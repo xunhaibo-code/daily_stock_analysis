@@ -59,7 +59,15 @@ jobs:
           cd apps/dsa-desktop
           npm version "${VERSION}" --no-git-tag-version --allow-same-version
           node -e "const pkg = require('./package.json'); if (pkg.version !== process.env.VERSION) throw new Error('package version mismatch: ' + pkg.version); console.log('desktop version:', pkg.version);"
-
+      
+      - name: Inject DeepSeek config into .env.example
+        shell: bash
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          sed -i "s|^DEEPSEEK_API_KEY=.*|DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}|" .env.example
+          echo "Injected DEEPSEEK_API_KEY into .env.example"
+          
       - name: Build desktop package (Windows)
         shell: pwsh
         env:
@@ -186,6 +194,14 @@ jobs:
       - name: Disable Spotlight indexing (prevents hdiutil Resource busy)
         run: sudo mdutil -a -i off
 
+      - name: Inject DeepSeek config into .env.example
+        shell: bash
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          sed -i '' "s|^DEEPSEEK_API_KEY=.*|DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}|" .env.example
+          echo "Injected DEEPSEEK_API_KEY into .env.example"
+          
       - name: Build desktop package (macOS)
         env:
           DSA_MAC_ARCH: ${{ matrix.arch }}
